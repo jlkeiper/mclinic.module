@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//OpenMRS//DTD OpenMRS Config 1.0//EN" "http://resources.openmrs.org/doctype/config-1.0.dtd">
+<module configVersion="1.2">
+	
+	<!-- Base Module Properties -->
+	<id>mclinic</id>
+	<name>MClinic</name>
+	<version>1.0.0</version>
+	<package>org.openmrs.module.mclinic</package>
+	<author>Mindflow</author>
+	<description>
+		Allows for submitting of xforms from remote devices and provides web based error resolution mechanism
+	</description>
+	<!-- /Base Module Properties -->
+	
+	<!-- Module Activator -->
+	<activator>org.openmrs.module.mclinic.MclinicActivator</activator>
+	
+	<updateURL>https://dev.openmrs.org/modules/download/mclinic/update.rdf</updateURL>
+	
+	<require_version>1.8.0</require_version>
+	<require_database_version>1.2.04</require_database_version>
+	
+	<require_modules>
+		<require_module version="0.7.0">org.openmrs.module.reporting</require_module>
+		<require_module version="4.0.9">org.openmrs.module.xforms</require_module>
+	</require_modules>
+	
+	
+	<!-- Extensions - Adds link to admin page -->
+	<extension>
+		<point>org.openmrs.admin.list</point>
+		<class>org.openmrs.module.mclinic.extension.html.AdminExt</class>
+	</extension>
+	
+	<!-- Required Privileges -->
+    <privilege>
+		<name>View Xforms Properties</name>
+		<description>
+			Allows user to view module properties 
+		</description>
+	</privilege>
+	<privilege>
+		<name>View Xform Errors</name>
+		<description>
+			Allows user to view Xforms errors
+		</description>
+	</privilege>
+	<privilege>
+		<name>Comment on Xform Errors</name>
+		<description>
+			Allows user to review and comment on Xforms errors
+		</description>
+	</privilege>
+	<privilege>
+		<name>Resolve Xforms Error</name>
+		<description>
+			Allows user to resolve Xforms error
+		</description>
+	</privilege>
+	<privilege>
+		<name>Manage Downloadable forms</name>
+		<description>
+			Allows user to manage downloadable forms
+		</description>
+	</privilege>
+	<!-- /Required Privileges -->
+	
+	<!-- Any required properties goes here-->
+	<globalProperty>
+		<property>mclinic.drop_dir</property>
+		<defaultValue>mclinic/drop_dir</defaultValue>
+		<description>Directory where remote devices drop forms.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>mclinic.queue_dir</property>
+		<defaultValue>mclinic/queue</defaultValue>
+		<description>Directory for queuing Xforms before they are processed.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>mclinic.error_dir</property>
+		<defaultValue>mclinic/error</defaultValue>
+		<description>Directory for keeping erred forms during processing</description>
+	</globalProperty>
+	<globalProperty>
+		<property>mclinic.archive_dir</property>
+		<defaultValue>mclinic/archive/%Y/%M</defaultValue>
+		<description>Directory for storing successfully processed forms.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>mclinic.processHousehold</property>
+		<defaultValue>false</defaultValue>
+		<description>Property indicates whether mClinic is processing Household forms</description>
+	</globalProperty>
+	
+	<!-- Servlets -->
+	<!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> -->
+
+	<!-- Filters should sit here -->
+
+    <dwr><allow/><signatures/></dwr>
+
+	<!-- Internationalization -->
+	<!-- All message codes should start with mclinic. -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<!-- /Internationalization -->
+	
+	<mappingFiles>
+		MclinicXformsError.hbm.xml
+		MclinicXform.hbm.xml
+		DefinitionProperty.hbm.xml
+		ExtendedDefinition.hbm.xml
+		ProgramConfiguration.hbm.xml
+		ConfiguredConcept.hbm.xml
+	</mappingFiles>
+</module>

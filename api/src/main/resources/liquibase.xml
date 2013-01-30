@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+    <changeSet author="sthaiya" id="1341069166359-1">
+        <createTable tableName="mclinic_xform">
+            <column autoIncrement="true" name="mclinic_xform_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="xform_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="xform_name" type="VARCHAR(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="xform_meta" type="VARCHAR(100)"/>
+            <column name="xform_xml" type="LONGTEXT"/>
+            <column name="program" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+            <column name="creator" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="DATETIME" defaultValueDate="0002-11-30T00:00:00.0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="mclinic_xform"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="sthaiya" id="1341069166359-2">
+        <createTable tableName="mclinic_xform_error">
+            <column autoIncrement="true" name="xforms_error_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="form_name" type="MEDIUMTEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error" type="VARCHAR(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_details" type="TEXT"/>
+            <column name="comment" type="VARCHAR(255)" defaultValue=""/>
+            <column name="commented_by" type="INT" defaultValueNumeric="0"/>
+            <column name="date_commented" type="DATETIME"/>
+            <column name="creator" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="DATETIME" defaultValueDate="0002-11-30T00:00:00.0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="mclinic_xform_error"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="sthaiya" id="1341069166359-3">
+        <addForeignKeyConstraint baseColumnNames="creator" baseTableName="mclinic_xform"
+                                 constraintName="user_who_added_mclinic_xform" deferrable="false" initiallyDeferred="false"
+                                 referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet author="sthaiya" id="1341069166359-4">
+        <addForeignKeyConstraint baseColumnNames="commented_by" baseTableName="mclinic_xform_error"
+                                 constraintName="User_who_commented_on_this_mclinic_error" deferrable="false" initiallyDeferred="false"
+                                 referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet author="sthaiya" id="1341069166359-5">
+        <addForeignKeyConstraint baseColumnNames="creator" baseTableName="mclinic_xform_error"
+                                 constraintName="User_who_created_mclinic_error" deferrable="false" initiallyDeferred="false"
+                                 referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+    
+    <changeSet author="sthaiya" id="1341069166359-6" dbms="mysql">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM scheduler_task_config where name = 'Process Xforms'
+			</sqlCheck>
+		</preConditions>
+        <insert tableName="scheduler_task_config">
+            <column name="name" value="Process Xforms"/>
+            <column name="description" value="Process all forms in the mclinic queue."/>
+            <column name="schedulable_class" value="org.openmrs.module.mclinic.api.task.ProcessXformsTask"/>
+            <column name="start_time" valueDate="2009-09-15 22:22:00"/>
+            <column name="repeat_interval" valueNumeric="30"/>
+            <column name="start_on_startup" valueNumeric="1"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="date_created" valueDate="2009-09-15 22:22:00"/>
+            <column name="uuid" valueNumeric="name-of-uuid-function"/>
+        </insert>
+        <modifySql dbms="mysql"><replace replace="name-of-uuid-function" with="UUID()"/></modifySql>
+		<modifySql><replace replace="name-of-uuid-function" with="current_timestamp * 99999999999999"/></modifySql>
+    </changeSet>
+    
+    <changeSet id="20120306160606" author="nribeka">
+		<createTable tableName="mclinic_definition_property">
+			<column autoIncrement="true" name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="property" type="varchar(255)"/>
+			<column name="property_value" type="varchar(255)"/>
+			<column name="property_description" type="varchar(255)"/>
+
+			<column name="definition_id" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime" defaultValueDate="0002-11-30T00:00:00.0">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="retired" type="tinyint" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="datetime"/>
+
+			<column name="uuid" type="varchar(38)">
+				<constraints unique="true" nullable="false"/>
+			</column>
+		</createTable>
+		<rollback>
+			<dropTable tableName="mclinic_definition_property"/>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="20120306160607" author="nribeka">
+		<createTable tableName="mclinic_extended_definition">
+			<column autoIncrement="true" name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="definition" type="varchar(38)" defaultValue="">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime" defaultValueDate="0002-11-30T00:00:00.0">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="retired" type="tinyint" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="datetime"/>
+
+			<column name="uuid" type="varchar(38)">
+				<constraints unique="true" nullable="false"/>
+			</column>
+		</createTable>
+		<rollback>
+			<dropTable tableName="mclinic_extended_definition"/>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="20120306160608" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="creator" baseTableName="mclinic_definition_property"
+		                         constraintName="user_who_created_mclinic_definition_property" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120306160609" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="creator" baseTableName="mclinic_extended_definition"
+		                         constraintName="user_who_created_mclinic_extended_definition" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120306160610" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="retired_by" baseTableName="mclinic_definition_property"
+		                         constraintName="user_who_retire_mclinic_definition_property" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120306160611" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="retired_by" baseTableName="mclinic_extended_definition"
+		                         constraintName="user_who_retire_mclinic_extended_definition" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120306160612" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="definition_id" baseTableName="mclinic_definition_property"
+		                         constraintName="extended_definition_of_mclinic_definition_property" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="id" referencedTableName="mclinic_extended_definition"/>
+	</changeSet>
+
+	<changeSet id="20120416160606" author="nribeka">
+		<createTable tableName="mclinic_configured_concept">
+			<column autoIncrement="true" name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="concept_id" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="configuration_id" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime" defaultValueDate="0002-11-30T00:00:00.0">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="retired" type="tinyint" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="datetime"/>
+
+			<column name="uuid" type="varchar(38)">
+				<constraints unique="true" nullable="false"/>
+			</column>
+		</createTable>
+		<rollback>
+			<dropTable tableName="mclinic_configured_concept"/>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="20120416160607" author="nribeka">
+		<createTable tableName="mclinic_program_configuration">
+			<column autoIncrement="true" name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="name" type="varchar(255)"/>
+			<column name="description" type="varchar(255)"/>
+
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime" defaultValueDate="0002-11-30T00:00:00.0">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="retired" type="tinyint" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="datetime"/>
+
+			<column name="uuid" type="varchar(38)">
+				<constraints unique="true" nullable="false"/>
+			</column>
+		</createTable>
+		<rollback>
+			<dropTable tableName="mclinic_program_configuration"/>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="20120416160608" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="creator" baseTableName="mclinic_configured_concept"
+		                         constraintName="user_who_created_mclinic_configured_concept" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120416160609" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="creator" baseTableName="mclinic_program_configuration"
+		                         constraintName="user_who_created_mclinic_program_configuration" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120416160610" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="retired_by" baseTableName="mclinic_configured_concept"
+		                         constraintName="user_who_retire_mclinic_configured_concept" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120416160611" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="retired_by" baseTableName="mclinic_program_configuration"
+		                         constraintName="user_who_retire_mclinic_program_configuration" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="user_id" referencedTableName="users"/>
+	</changeSet>
+
+	<changeSet id="20120416160612" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="concept_id" baseTableName="mclinic_configured_concept"
+		                         constraintName="concept_of_mclinic_configured_concept" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="concept_id" referencedTableName="concept"/>
+	</changeSet>
+
+	<changeSet id="20120416160613" author="nribeka">
+		<addForeignKeyConstraint baseColumnNames="configuration_id" baseTableName="mclinic_configured_concept"
+		                         constraintName="configuration_of_mclinic_configured_concept" deferrable="false" initiallyDeferred="false"
+		                         referencedColumnNames="id" referencedTableName="mclinic_program_configuration"/>
+	</changeSet>
+	<changeSet author="sthaiya" id="1341069166359-7">
+        <addForeignKeyConstraint baseColumnNames="program" baseTableName="mclinic_xform"
+                                 constraintName="program_to_which_the_form_belongs" deferrable="false" initiallyDeferred="false"
+                                 referencedColumnNames="id" referencedTableName="mclinic_program_configuration"/>
+    </changeSet>
+</databaseChangeLog>
